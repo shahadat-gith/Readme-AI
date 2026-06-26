@@ -15,20 +15,28 @@ if (!GEMINI_API_KEY) {
 const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 
 /**
- * Routes structured contextual prompts directly to Gemini 2.5 Flash using system configurations.
- * @param {string} userPromptPayload - The complete prompt returned from buildReadmePrompt().
- * @returns {Promise<string>} The structured markdown string generation output.
+ * Routes prompts to Gemini 2.5 Flash.
+ *
+ * @param {string} userPromptPayload - The user prompt / chat content.
+ * @param {object} [options] - Optional config.
+ * @param {string|null} [options.systemInstruction=null] - System instruction (pass README_SYSTEM_INSTRUCTION for readme generation, null for chat).
+ * @param {number} [options.temperature=0.2] - Model temperature.
+ * @returns {Promise<string>} The generated text.
  */
-export async function getAiResponse(userPromptPayload) {
+export async function getAiResponse(userPromptPayload, options = {}) {
+  const systemInstruction = options.systemInstruction ?? null;
+  const temperature = options.temperature ?? 0.2;
+
+  const config = { temperature };
+  if (systemInstruction) {
+    config.systemInstruction = systemInstruction;
+  }
+
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: userPromptPayload,
-      // Pass the system instruction configuration cleanly via config object
-      config: {
-        systemInstruction: README_SYSTEM_INSTRUCTION,
-        temperature: 0.2, // Kept low to enforce strict technical accuracy without creative liberties
-      }
+      config,
     });
 
     if (!response || !response.text) {

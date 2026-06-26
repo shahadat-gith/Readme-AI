@@ -21,7 +21,7 @@ connectDB();
 // Production Middleware Layer
 app.use(helmet()); 
 app.use(cors({
-  origin:"*"
+  origin:[process.env.CLIENT_URL]
 })); 
 app.use(compression()); 
 app.use(express.json()); 

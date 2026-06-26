@@ -34,7 +34,7 @@ export default function ChatPage() {
 
     try {
       const result = await askQuestion(repositoryId, question);
-      const answer = result.answer || result.message || '';
+      const answer = result.data?.answer || result.answer || result.message || '';
       setMessages((prev) => [...prev, { role: 'assistant', content: answer }]);
     } catch (err) {
       setError(err.response?.data?.error || err.message || 'Failed to get answer');

@@ -1,6 +1,6 @@
 // src/services/readme.js
 import { buildRAGContext } from './rag.js';
-import { buildReadmePrompt } from '../utils/promptBuilder.js';
+import { buildReadmePrompt, README_SYSTEM_INSTRUCTION } from '../utils/promptBuilder.js';
 import { getAiResponse } from './gemini.js';
 import Readme from '../models/Readme.js';
 
@@ -22,7 +22,9 @@ export async function generateReadmeFile(repositoryId, userId) {
 
   // 3. Dispatch to Gemini
   console.log(`[Readme Service] Sending to Gemini 2.5 Flash...`);
-  const generatedMarkdownText = await getAiResponse(formattedUserPrompt);
+  const generatedMarkdownText = await getAiResponse(formattedUserPrompt, {
+    systemInstruction: README_SYSTEM_INSTRUCTION,
+  });
 
   // 4. Upsert: replace existing README for this repo+user combo if one exists
   const storedDocumentResult = await Readme.findOneAndUpdate(
