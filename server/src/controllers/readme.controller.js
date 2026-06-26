@@ -13,8 +13,8 @@ export const generateReadme = async (req, res) => {
 
   if (!repositoryId) {
     return res.status(400).json({
-      error: 'Bad Request',
-      message: 'The repositoryId property is required in the request body.',
+      success: false,
+      message: 'The repositoryId property is required.',
     });
   }
 
@@ -22,12 +22,11 @@ export const generateReadme = async (req, res) => {
     const repo = await Repository.findOne({ _id: repositoryId, user: userId });
     if (!repo) {
       return res.status(404).json({
-        error: 'Not Found',
+        success: false,
         message: 'Repository not found or does not belong to you.',
       });
     }
 
-    console.log(`[Controller] Generating README for repository: ${repositoryId}`);
     const readmeDocument = await generateReadmeFile(repositoryId, userId);
 
     return res.status(201).json({
@@ -41,11 +40,9 @@ export const generateReadme = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error(`[Controller Error] README generation failed: ${error.message}`);
     return res.status(500).json({
-      error: 'Internal Server Error',
+      success: false,
       message: 'README generation failed.',
-      details: error.message,
     });
   }
 };
@@ -63,14 +60,14 @@ export const getReadmeByRepositoryId = async (req, res) => {
 
     if (!readme) {
       return res.status(404).json({
-        error: 'Not Found',
+        success: false,
         message: 'README not found for this repository.',
       });
     }
 
     return res.status(200).json({ success: true, data: readme });
   } catch (error) {
-    return res.status(500).json({ error: 'Internal Server Error', message: error.message });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -100,7 +97,7 @@ export const listUserReadmes = async (req, res) => {
     });
   } catch (error) {
     return res.status(500).json({
-      error: 'Internal Server Error',
+      success: false,
       message: error.message,
     });
   }
@@ -119,7 +116,7 @@ export const downloadReadme = async (req, res) => {
 
     if (!readme) {
       return res.status(404).json({
-        error: 'Not Found',
+        success: false,
         message: 'README not found for this repository.',
       });
     }
@@ -132,7 +129,7 @@ export const downloadReadme = async (req, res) => {
     res.send(readme.markdown);
   } catch (error) {
     return res.status(500).json({
-      error: 'Internal Server Error',
+      success: false,
       message: error.message,
     });
   }

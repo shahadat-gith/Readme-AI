@@ -1,16 +1,15 @@
-// src/models/Readme.js
 import mongoose from 'mongoose';
 
 const ReadmeSchema = new mongoose.Schema({
-  repositoryId: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'Repository', 
+  repositoryId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Repository',
     required: true,
-    unique: true 
+    unique: true
   },
   markdown: { type: String, required: true },
-  user: { 
-    type: mongoose.Schema.Types.ObjectId, 
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true,
     index: true

@@ -21,7 +21,6 @@ export async function generateReadmeFile(repositoryId, userId) {
   const formattedUserPrompt = buildReadmePrompt(contextString);
 
   // 3. Dispatch to Gemini
-  console.log(`[Readme Service] Sending to Gemini 2.5 Flash...`);
   const generatedMarkdownText = await getAiResponse(formattedUserPrompt, {
     systemInstruction: README_SYSTEM_INSTRUCTION,
   });

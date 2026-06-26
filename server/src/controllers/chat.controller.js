@@ -1,4 +1,4 @@
-// src/controllers/chat.controller.js
+import mongoose from 'mongoose';
 import { buildRAGContext } from '../services/rag.js';
 import { buildChatPrompt } from '../utils/promptBuilder.js';
 import { getAiResponse } from '../services/gemini.js';
@@ -14,27 +14,42 @@ export const askQuestion = async (req, res) => {
 
   if (!repositoryId || !question) {
     return res.status(400).json({
-      error: 'Bad Request',
-      message: 'Both repositoryId and question properties are required in the request body.',
+      success: false,
+      message: 'Both repositoryId and question are required.',
+    });
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(repositoryId)) {
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid repository ID format.',
     });
   }
 
   try {
-    // Verify the repository belongs to this user
     const repo = await Repository.findOne({ _id: repositoryId, user: userId });
     if (!repo) {
       return res.status(404).json({
-        error: 'Not Found',
+        success: false,
         message: 'Repository not found or does not belong to you.',
       });
     }
 
-    console.log(`[Controller] Processing query for repository ${repositoryId}: "${question.substring(0, 60)}..."`);
-
     const { contextString, repository } = await buildRAGContext(repositoryId, question, 8);
-    const formattedPrompt = buildChatPrompt(question, contextString);
 
-    console.log('[Controller] Dispatching question to Gemini...');
+    if (!contextString || contextString.trim() === '') {
+      return res.status(200).json({
+        success: true,
+        data: {
+          question,
+          answer: 'No relevant code context found in this repository to answer your question. Try asking about the repository structure, dependencies, or specific files.',
+          repositoryId,
+          repositoryName: repository.name,
+        },
+      });
+    }
+
+    const formattedPrompt = buildChatPrompt(question, contextString);
     const answer = await getAiResponse(formattedPrompt);
 
     return res.status(200).json({
@@ -44,15 +59,12 @@ export const askQuestion = async (req, res) => {
         answer,
         repositoryId,
         repositoryName: repository.name,
-        contextChunksUsed: 8,
       },
     });
   } catch (error) {
-    console.error(`[Controller Error] Chat query failed: ${error.message}`);
     return res.status(500).json({
-      error: 'Internal Server Error',
+      success: false,
       message: 'Failed to process your question.',
-      details: error.message,
     });
   }
 };

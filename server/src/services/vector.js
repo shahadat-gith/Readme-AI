@@ -24,12 +24,7 @@ export async function storeEmbeddings(chunks) {
     }
   }));
 
-  try {
-    return await Chunk.bulkWrite(operations, { ordered: false });
-  } catch (error) {
-    console.error(`Data Layer Error: Failed during chunks bulk write execution: ${error.message}`);
-    throw error;
-  }
+  return Chunk.bulkWrite(operations, { ordered: false });
 }
 
 /**
@@ -65,7 +60,6 @@ export async function vectorSearch(repositoryId, queryEmbedding, limit = 5) {
 
     return searchResults;
   } catch (error) {
-    console.error(`Semantic Retrieval Error: Vector search execution crashed: ${error.message}`);
     throw error;
   }
 }

@@ -7,14 +7,14 @@ dotenv.config();
 const PORT = process.env.PORT || 5000;
 
 const server = app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.error(`Server running on port ${PORT}`);
 });
 
 // Handle graceful shutdowns for production stability (e.g., Docker/Kubernetes orchestration)
 process.on('SIGTERM', () => {
-  console.log('SIGTERM signal received: closing HTTP server safely.');
+  console.error('SIGTERM received: closing HTTP server.');
   server.close(() => {
-    console.log('HTTP server closed cleanly.');
+    console.error('HTTP server closed.');
     process.exit(0);
   });
 });

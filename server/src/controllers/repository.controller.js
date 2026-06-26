@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { runAnalysisPipeline } from '../services/pipeline.js';
 import Repository from '../models/Repository.js';
 
@@ -11,13 +12,20 @@ export const analyzeRepository = async (req, res) => {
 
   if (!githubUrl) {
     return res.status(400).json({
-      error: 'Bad Request',
-      message: 'The githubUrl property is required in the request body.',
+      success: false,
+      message: 'The githubUrl property is required.',
+    });
+  }
+
+  const githubUrlPattern = /^https?:\/\/github\.com\/[^/]+\/[^/.]+/;
+  if (!githubUrlPattern.test(githubUrl)) {
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid GitHub URL format.',
     });
   }
 
   try {
-    console.log(`[Controller] Starting analysis pipeline for: ${githubUrl}`);
 
     const repository = await runAnalysisPipeline(githubUrl, userId);
 
@@ -42,11 +50,9 @@ export const analyzeRepository = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error(`[Controller Error] Analysis failed: ${error.message}`);
     return res.status(500).json({
-      error: 'Internal Server Error',
-      message: 'Repository analysis failed.',
-      details: error.message,
+      success: false,
+      message: error.message || 'Repository analysis failed.',
     });
   }
 };
@@ -57,6 +63,13 @@ export const analyzeRepository = async (req, res) => {
  */
 export const getRepositoryById = async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid repository ID format.',
+      });
+    }
+
     const repo = await Repository.findOne({
       _id: req.params.id,
       user: req.user._id,
@@ -64,7 +77,7 @@ export const getRepositoryById = async (req, res) => {
 
     if (!repo) {
       return res.status(404).json({
-        error: 'Not Found',
+        success: false,
         message: 'Repository not found or does not belong to you.',
       });
     }
@@ -75,16 +88,13 @@ export const getRepositoryById = async (req, res) => {
     });
   } catch (error) {
     return res.status(500).json({
-      error: 'Internal Server Error',
+      success: false,
       message: error.message,
     });
   }
 };
 
-/**
- * List all repositories for the authenticated user.
- * GET /api/repository
- */
+
 export const listUserRepositories = async (req, res) => {
   try {
     const repos = await Repository.find({ user: req.user._id })
@@ -97,7 +107,7 @@ export const listUserRepositories = async (req, res) => {
     });
   } catch (error) {
     return res.status(500).json({
-      error: 'Internal Server Error',
+      success: false,
       message: error.message,
     });
   }

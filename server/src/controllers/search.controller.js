@@ -13,22 +13,19 @@ export const semanticSearch = async (req, res) => {
 
   if (!repositoryId || !query) {
     return res.status(400).json({
-      error: 'Bad Request',
-      message: 'Both repositoryId and query properties are required in the request body.',
+      success: false,
+      message: 'Both repositoryId and query are required.',
     });
   }
 
   try {
-    // Verify the repository belongs to this user
     const repository = await Repository.findOne({ _id: repositoryId, user: userId });
     if (!repository) {
       return res.status(404).json({
-        error: 'Not Found',
+        success: false,
         message: 'Repository not found or does not belong to you.',
       });
     }
-
-    console.log(`[Controller] Semantic search in ${repositoryId}: "${query.substring(0, 60)}..."`);
 
     const queryVector = await generateEmbedding(query);
     const results = await vectorSearch(repositoryId, queryVector, 10);
@@ -53,11 +50,10 @@ export const semanticSearch = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error(`[Controller Error] Semantic search failed: ${error.message}`);
     return res.status(500).json({
-      error: 'Internal Server Error',
+      success: false,
       message: 'Semantic search failed.',
-      details: error.message,
     });
   }
 };
+

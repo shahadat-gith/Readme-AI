@@ -18,12 +18,7 @@ export async function buildRAGContext(repositoryId, queryText, chunkLimit = 6) {
       throw new Error(`Repository record profile [ID: ${repositoryId}] not found.`);
     }
 
-    // 2. Generate a dense vector embedding array for the query text
-    console.log(`[RAG Engine] Generating vector query fingerprint for: "${queryText.substring(0, 40)}..."`);
     const queryVector = await generateEmbedding(queryText);
-
-    // 3. Execute the Atlas Cosine-Similarity Search operation
-    console.log(`[RAG Engine] Searching via Atlas Vector Search on index...`);
     const matchedChunks = await vectorSearch(repositoryId, queryVector, chunkLimit);
 
     // 4. Synthesize retrieved code segments into an isolated context markdown block
@@ -51,7 +46,6 @@ export async function buildRAGContext(repositoryId, queryText, chunkLimit = 6) {
 
     return { contextString, repository };
   } catch (error) {
-    console.error(`❌ [RAG Engine Error]: Context consolidation failed: ${error.message}`);
     throw error;
   }
 }

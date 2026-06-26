@@ -1,15 +1,13 @@
-// src/models/Repository.js
 import mongoose from 'mongoose';
 
 const RepositorySchema = new mongoose.Schema({
-  githubUrl: { 
-    type: String, 
+  githubUrl: {
+    type: String,
     required: true,
-    trim: true 
+    trim: true
   },
   name: { type: String, required: true },
   owner: { type: String, required: true },
-  branch: { type: String, default: 'main' },
   language: { type: String, default: 'Unknown' },
   framework: { type: String, default: 'Unknown' },
   database: { type: String, default: 'Unknown' },
@@ -20,12 +18,12 @@ const RepositorySchema = new mongoose.Schema({
     folders: { type: Number, default: 0 },
     linesOfCode: { type: Number, default: 0 }
   },
-  folderTree: { 
-    type: mongoose.Schema.Types.Mixed, 
-    default: {} 
+  folderTree: {
+    type: mongoose.Schema.Types.Mixed,
+    default: []
   },
-  user: { 
-    type: mongoose.Schema.Types.ObjectId, 
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true,
     index: true
@@ -33,7 +31,6 @@ const RepositorySchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
-// Compound index for user-specific lookups
 RepositorySchema.index({ user: 1, createdAt: -1 });
 RepositorySchema.index({ githubUrl: 1 });
 

@@ -17,8 +17,9 @@ export default function SearchPage() {
     setLoading(true);
     setError(null);
     try {
-      const data = await semanticSearch(repositoryId, query);
-      setResults(data.results || data.chunks || []);
+      const response = await semanticSearch(repositoryId, query);
+      const results = response.data?.data?.results || response.data?.results || [];
+      setResults(results);
     } catch (err) {
       setError(err.response?.data?.error || err.message || 'Search failed');
     } finally {

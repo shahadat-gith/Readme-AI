@@ -38,7 +38,6 @@ export async function generateEmbedding(text) {
     
     return vectorResult;
   } catch (error) {
-    console.error(`HuggingFace embedding generation failed: ${error.message}`);
     throw error;
   }
 }

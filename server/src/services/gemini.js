@@ -40,12 +40,11 @@ export async function getAiResponse(userPromptPayload, options = {}) {
     });
 
     if (!response || !response.text) {
-      throw new Error("Empty or structurally broken response received from the Gemini API gateway.");
+      throw new Error('Empty response received from Gemini API.');
     }
 
     return response.text;
   } catch (error) {
-    console.error(`[Inference Engine Exception]: Generation failure: ${error.message}`);
     throw error;
   }
 }

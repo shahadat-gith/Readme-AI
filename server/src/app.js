@@ -20,9 +20,17 @@ connectDB();
 
 // Production Middleware Layer
 app.use(helmet()); 
+
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  'http://localhost:5173' 
+];
+
 app.use(cors({
-  origin:[process.env.CLIENT_URL]
-})); 
+  origin: allowedOrigins,
+  credentials: true // Include this if you are handling cookies/sessions
+}));
+
 app.use(compression()); 
 app.use(express.json()); 
 
@@ -42,19 +50,18 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Global Error Handler Guard
+// Global Error Handler
 app.use((err, req, res, next) => {
   console.error(`Unhandled Server Exception: ${err.message}`);
-  
-  // Handle specific error types gracefully
+
   if (err.name === 'ValidationError') {
-    return res.status(400).json({ error: 'Validation Error', message: err.message });
+    return res.status(400).json({ success: false, message: err.message });
   }
   if (err.name === 'CastError') {
-    return res.status(400).json({ error: 'Invalid ID Format', message: 'The provided ID is not valid.' });
+    return res.status(400).json({ success: false, message: 'Invalid ID format.' });
   }
-  
-  res.status(500).json({ error: 'Critical System Error', message: err.message });
+
+  res.status(500).json({ success: false, message: 'Internal server error.' });
 });
 
 export default app;
